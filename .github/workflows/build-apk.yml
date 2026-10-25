@@ -1,0 +1,48 @@
+
+name: Build StudyBook APK
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'StudyBookAndroid_Project.zip'
+      - '.github/workflows/build-apk.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Extract Android project
+        run: |
+          unzip StudyBookAndroid_Project.zip
+          test -f StudyBookAndroid/app/build.gradle
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Build APK
+        run: |
+          cd StudyBookAndroid
+          gradle assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: StudyBook-APK
+          path: StudyBookAndroid/app/build/outputs/apk/debug/*.apk
+          
